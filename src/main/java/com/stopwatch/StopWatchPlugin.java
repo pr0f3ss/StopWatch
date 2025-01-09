@@ -28,6 +28,8 @@ public class StopWatchPlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
+	//test
+
 	@Inject
 	private ClientThread clientThread;
 
