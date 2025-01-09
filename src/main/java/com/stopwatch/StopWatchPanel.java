@@ -9,61 +9,55 @@ import java.awt.event.ActionListener;
 
 public class StopWatchPanel extends PluginPanel
 {
-    private final JLabel timerLabel;
-    private final Timer timer;
-
+    private final JLabel timeLabel;
     private long startTime = 0;
+    private long lastUpdateTime = 0;
     private boolean running = false;
+
+    // Swing Timer to update the UI periodically
+    private final Timer timer;
 
     public StopWatchPanel()
     {
+        // Set layout for the main panel
         setLayout(new BorderLayout());
-        timerLabel = new JLabel("00:00:00", SwingConstants.CENTER);
-        timerLabel.setFont(new Font("Arial", Font.BOLD, 24));
 
-        // Timer to update the stopwatch
-        timer = new Timer(100, new ActionListener()
+        // Create time label
+        timeLabel = new JLabel("0:00:00.000", SwingConstants.CENTER);
+        timeLabel.setFont(new Font("Arial", Font.BOLD, 20));
+        add(timeLabel, BorderLayout.CENTER);  // Add time label to the center
+
+        // Button panel for Start, Stop, Reset
+        JPanel buttonPanel = new JPanel(new GridLayout(1,3));  // Use FlowLayout for buttons
+        add(buttonPanel, BorderLayout.SOUTH);  // Add the button panel to the bottom
+
+        // Create buttons
+        JButton startButton = new JButton("Start");
+        JButton stopButton = new JButton("Stop");
+        JButton resetButton = new JButton("Reset");
+
+        // Add buttons to the button panel
+        buttonPanel.add(startButton);
+        buttonPanel.add(stopButton);
+        buttonPanel.add(resetButton);
+
+        // Timer: fires every 50ms to update milliseconds
+        timer = new Timer(50, new ActionListener()
         {
             @Override
             public void actionPerformed(ActionEvent e)
             {
                 if (running)
                 {
-                    long elapsedTime = System.currentTimeMillis() - startTime;
-                    timerLabel.setText(formatTime(elapsedTime));
+                    updateTimer();
                 }
             }
         });
 
-        add(timerLabel, BorderLayout.CENTER);
-        add(createButtonPanel(), BorderLayout.SOUTH);
-    }
-
-    public void init()
-    {
-        timer.start();
-    }
-
-    private JPanel createButtonPanel()
-    {
-        JPanel buttonPanel = new JPanel(new GridLayout(1, 3));
-
-        // Start Button
-        JButton startButton = new JButton("Start");
+        // Button Actions
         startButton.addActionListener(e -> startTimer());
-        buttonPanel.add(startButton);
-
-        // Stop Button
-        JButton stopButton = new JButton("Stop");
         stopButton.addActionListener(e -> stopTimer());
-        buttonPanel.add(stopButton);
-
-        // Reset Button
-        JButton resetButton = new JButton("Reset");
         resetButton.addActionListener(e -> resetTimer());
-        buttonPanel.add(resetButton);
-
-        return buttonPanel;
     }
 
     private void startTimer()
@@ -71,27 +65,53 @@ public class StopWatchPanel extends PluginPanel
         if (!running)
         {
             running = true;
-            startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis() - getElapsedTime();
+            lastUpdateTime = startTime;  // Save the time at which the timer was started
+            timer.start(); // Start the Swing Timer
         }
     }
 
     private void stopTimer()
     {
         running = false;
+        timer.stop(); // Stop the Swing Timer
     }
 
     private void resetTimer()
     {
-        running = false;
+        stopTimer();
         startTime = 0;
-        timerLabel.setText("00:00:00");
+        lastUpdateTime = 0;
+        updateLabel(0); // Reset the label
     }
 
-    private String formatTime(long millis)
+    private void updateTimer()
     {
-        long seconds = millis / 1000 % 60;
-        long minutes = millis / (1000 * 60) % 60;
-        long hours = millis / (1000 * 60 * 60);
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
+        long elapsedTime = getElapsedTime();
+        updateLabel(elapsedTime);
+    }
+
+    private long getElapsedTime()
+    {
+        if (startTime == 0)
+        {
+            return 0;
+        }
+        return System.currentTimeMillis() - startTime;
+    }
+
+    private void updateLabel(long elapsedTime)
+    {
+        int hours = (int) (elapsedTime / 3600000);
+        int minutes = (int) ((elapsedTime % 3600000) / 60000);
+        int seconds = (int) ((elapsedTime % 60000) / 1000);
+        int milliseconds = (int) (elapsedTime % 1000); // Get milliseconds
+
+        String timeString = String.format("%d:%02d:%02d.%03d", hours, minutes, seconds, milliseconds);
+        timeLabel.setText(timeString);
+
+        // Refresh the panel
+        revalidate();
+        repaint();
     }
 }
