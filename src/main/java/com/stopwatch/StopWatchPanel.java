@@ -4,23 +4,15 @@ import net.runelite.client.ui.PluginPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.InputStream; // For reading the sound file from resources
-import javax.sound.sampled.AudioInputStream; // For handling audio streams
-import javax.sound.sampled.AudioSystem; // For managing audio system features
-import javax.sound.sampled.Clip; // For playing audio clips
-import net.runelite.client.ui.components.materialtabs.MaterialTab;
-import net.runelite.client.ui.components.materialtabs.MaterialTabGroup;
-import net.runelite.client.util.ImageUtil;
-import javax.swing.border.EmptyBorder;
+import java.io.InputStream;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-public class StopWatchPanel extends PluginPanel
-{
-
+public class StopWatchPanel extends PluginPanel {
     // Stopwatch variables
     private JLabel timeLabel;
     private long startTime = 0;
@@ -32,11 +24,9 @@ public class StopWatchPanel extends PluginPanel
     private long countdownTime = 0;
     private boolean countdownRunning = false;
     private Timer countdownSwingTimer;
-    private JTextField countdownInputField;
     private JLabel countdownLabel;
 
-    public StopWatchPanel(StopWatchConfig config)
-    {
+    public StopWatchPanel(StopWatchConfig config) {
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Stopwatch Tab
@@ -47,14 +37,12 @@ public class StopWatchPanel extends PluginPanel
         JPanel countdownPanel = createCountdownPanel(config);
         tabbedPane.addTab("Countdown Timer", countdownPanel);
 
-        // Add the tabbed pane to the main panel
         setLayout(new BorderLayout());
         add(tabbedPane, BorderLayout.CENTER);
     }
 
     // Create Stopwatch Panel
-    private JPanel createStopWatchPanel()
-    {
+    private JPanel createStopWatchPanel() {
         JPanel stopwatchPanel = new JPanel(new BorderLayout());
 
         // Stopwatch time label
@@ -64,14 +52,13 @@ public class StopWatchPanel extends PluginPanel
         stopwatchPanel.add(timeLabel, BorderLayout.NORTH);
 
         // Stopwatch Buttons
-        JPanel buttonPanel = new JPanel(new GridLayout(1,2));
+        JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
         JButton startStopButton = new JButton("Start");
         JButton resetButton = new JButton("Reset");
 
         // Set initial colors and add buttons to the panel
         startStopButton.setBackground(Color.decode("#397A66"));
         startStopButton.setForeground(Color.WHITE);
-
         buttonPanel.add(startStopButton);
         buttonPanel.add(resetButton);
 
@@ -108,8 +95,7 @@ public class StopWatchPanel extends PluginPanel
     }
 
     // Stopwatch Methods
-    private void startStopwatch()
-    {
+    private void startStopwatch() {
         if (!stopwatchRunning) {
             stopwatchRunning = true;
             startTime = System.currentTimeMillis() - elapsedTime;
@@ -117,8 +103,7 @@ public class StopWatchPanel extends PluginPanel
         }
     }
 
-    private void stopStopwatch()
-    {
+    private void stopStopwatch() {
         if (stopwatchRunning) {
             elapsedTime = System.currentTimeMillis() - startTime; // Save the current elapsed time
             stopwatchRunning = false;
@@ -126,28 +111,24 @@ public class StopWatchPanel extends PluginPanel
         }
     }
 
-    private void resetStopwatch()
-    {
+    private void resetStopwatch() {
         stopStopwatch();
         elapsedTime = 0;
         updateStopwatchLabel(0);
     }
 
-    private void updateStopwatch()
-    {
+    private void updateStopwatch() {
         updateStopwatchLabel(getElapsedStopwatchTime());
     }
 
-    private long getElapsedStopwatchTime()
-    {
+    private long getElapsedStopwatchTime() {
         if (!stopwatchRunning) {
             return elapsedTime; // Return stored elapsed time when not running
         }
         return System.currentTimeMillis() - startTime; // Calculate elapsed time when running
     }
 
-    private void updateStopwatchLabel(long elapsedTime)
-    {
+    private void updateStopwatchLabel(long elapsedTime) {
         // int hours = (int) (elapsedTime / 3600000);
         int minutes = (int) ((elapsedTime % 3600000) / 60000);
         int seconds = (int) ((elapsedTime % 60000) / 1000);
@@ -157,10 +138,9 @@ public class StopWatchPanel extends PluginPanel
         timeLabel.setText(timeString);
     }
 
-    private JPanel createCountdownPanel(StopWatchConfig config)
-    {
+    // Create Countdown Panel
+    private JPanel createCountdownPanel(StopWatchConfig config) {
         JPanel countdownPanel = new JPanel(new BorderLayout());
-
         JPanel countdownTimerPanel = new JPanel(new BorderLayout());
 
         // Countdown time display
@@ -175,7 +155,6 @@ public class StopWatchPanel extends PluginPanel
         startCancelButton.setForeground(Color.WHITE);
         startCancelButton.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         countdownTimerPanel.add(startCancelButton, BorderLayout.SOUTH);
-
         countdownPanel.add(countdownTimerPanel, BorderLayout.NORTH);
 
         // Create a separator (horizontal line)
@@ -185,7 +164,7 @@ public class StopWatchPanel extends PluginPanel
         JTextField timeInputField = new JTextField("00:30", 10); // Placeholder
         timeInputField.setHorizontalAlignment(SwingConstants.CENTER);
 
-        // Create a panel for the input field and buttons using BoxLayout (vertical alignment)
+        // Create a panel for the input field
         JPanel centerPanel = new JPanel();
         centerPanel.setLayout(new BoxLayout(centerPanel, BoxLayout.Y_AXIS));
 
@@ -204,18 +183,17 @@ public class StopWatchPanel extends PluginPanel
 
         // Create a separator (horizontal line)
         JSeparator separatorBottom = new JSeparator(SwingConstants.HORIZONTAL);
-        // Creating a label to display text
-        JLabel presetPanelLabel = new JLabel("Timer Presets");
-        presetPanelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         // Preset Buttons Panel
+        JLabel presetPanelLabel = new JLabel("Timer Presets");
+        presetPanelLabel.setAlignmentX(Component.CENTER_ALIGNMENT);
         JPanel presetPanel = new JPanel();
         presetPanel.setLayout(new BoxLayout(presetPanel, BoxLayout.Y_AXIS));
         JButton cerberusPresetButton = new JButton("Cerberus");
         JButton inferno1PresetButton = new JButton("Inferno 1st Set");
         JButton inferno2PresetButton = new JButton("Inferno 2nd Set");
 
-        JPanel presetButtonPanel = new JPanel(new GridLayout(3,1));
+        JPanel presetButtonPanel = new JPanel(new GridLayout(3, 1));
         presetButtonPanel.add(cerberusPresetButton);
         presetButtonPanel.add(inferno1PresetButton);
         presetButtonPanel.add(inferno2PresetButton);
@@ -233,25 +211,22 @@ public class StopWatchPanel extends PluginPanel
         long[] selectedCountdownTime = {0}; // Store original countdown time
 
         // Define the countdown action listener
-        final ActionListener countdownAction = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (countdownTime > 0) {
-                    countdownTime -= 50; // Decrement by 50ms
-                    updateCountdownDisplay(countdownTime);
-                } else {
-                    // Countdown reached 0
-                    countdownSwingTimer.stop();
-                    countdownRunning = false;
+        final ActionListener countdownAction = e -> {
+            if (countdownTime > 0) {
+                countdownTime -= 50; // Decrement by 50ms
+                updateCountdownDisplay(countdownTime);
+            } else {
+                // Countdown reached 0
+                countdownSwingTimer.stop();
+                countdownRunning = false;
 
-                    if (config.useSound()) {
-                        playSound(); // Play sound on completion
-                    }
-
-                    // Reset the button to its initial state
-                    startCancelButton.setText("Start Countdown");
-                    startCancelButton.setBackground(Color.decode("#397A66"));
+                if (config.useSound()) {
+                    playSound(); // Play sound on completion
                 }
+
+                // Reset the button to its initial state
+                startCancelButton.setText("Start Countdown");
+                startCancelButton.setBackground(Color.decode("#397A66"));
             }
         };
 
@@ -292,22 +267,21 @@ public class StopWatchPanel extends PluginPanel
         // Preset Buttons Behavior
         cerberusPresetButton.addActionListener(e -> {
             timeInputField.setText("0:56"); // Set Cerberus preset
-            updateCountdownPreset(countdownPanel, timeInputField);
+            updateCountdownPreset(timeInputField);
         });
 
         inferno1PresetButton.addActionListener(e -> {
             timeInputField.setText("3:30"); // Set Inferno 1st Set preset
-            updateCountdownPreset(countdownPanel, timeInputField);
+            updateCountdownPreset(timeInputField);
         });
 
         inferno2PresetButton.addActionListener(e -> {
             timeInputField.setText("5:15"); // Set Inferno 2nd Set preset
-            updateCountdownPreset(countdownPanel, timeInputField);
+            updateCountdownPreset(timeInputField);
         });
 
         // Add DocumentListener to monitor text changes
-        timeInputField.getDocument().addDocumentListener(new DocumentListener()
-        {
+        timeInputField.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
                 updateTimer();
@@ -324,15 +298,15 @@ public class StopWatchPanel extends PluginPanel
             }
 
             private void updateTimer() {
-                updateCountdownPreset(countdownPanel, timeInputField);
+                updateCountdownPreset(timeInputField);
             }
         });
 
         return countdownPanel;
     }
 
-    private void updateCountdownPreset(JPanel countdownPanel, JTextField timeInputField) {
-        if(!countdownRunning){
+    private void updateCountdownPreset(JTextField timeInputField) {
+        if (!countdownRunning) {
             String userInput = timeInputField.getText().trim();
             try {
                 long totalMilliseconds = parseInputToMilliseconds(userInput);
@@ -344,38 +318,33 @@ public class StopWatchPanel extends PluginPanel
     }
 
     // Parses user input in "mm:ss" format into milliseconds
-    private long parseInputToMilliseconds(String input) throws NumberFormatException
-    {
+    private long parseInputToMilliseconds(String input) throws NumberFormatException {
         String[] parts = input.split(":");
-        if (parts.length != 2)
-        {
+        if (parts.length != 2) {
             throw new NumberFormatException("Invalid format");
         }
         int minutes = Integer.parseInt(parts[0].trim());
         int seconds = Integer.parseInt(parts[1].trim());
-        return (minutes * 60 + seconds) * 1000L; // Convert to milliseconds
+        return (minutes * 60L + seconds) * 1000L; // Convert to milliseconds
     }
 
     // Starts the countdown
-    private void startCountdown(long totalMilliseconds)
-    {
+    private void startCountdown(long totalMilliseconds) {
         countdownTime = totalMilliseconds;
         countdownRunning = true;
     }
 
     // Updates the countdown display with milliseconds
-    private void updateCountdownDisplay(long timeInMilliseconds)
-    {
+    private void updateCountdownDisplay(long timeInMilliseconds) {
         int minutes = (int) (timeInMilliseconds / 60000);
         int seconds = (int) ((timeInMilliseconds % 60000) / 1000);
         int centiseconds = (int) ((timeInMilliseconds % 1000) / 10);
         countdownLabel.setText(String.format("%02d:%02d.%02d", minutes, seconds, centiseconds));
     }
 
-    private void playSound()
-    {
-        try
-        {
+    // Plays sound notification
+    private void playSound() {
+        try {
             InputStream soundStream = getClass().getResourceAsStream("/sound/alert.wav");
             if (soundStream == null) {
                 System.err.println("Sound file not found!");
@@ -387,9 +356,7 @@ public class StopWatchPanel extends PluginPanel
             Clip clip = AudioSystem.getClip();
             clip.open(audioInputStream);
             clip.start();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             System.err.println("Error playing sound: " + e.getMessage());
         }
     }
