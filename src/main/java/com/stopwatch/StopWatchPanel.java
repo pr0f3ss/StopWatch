@@ -312,7 +312,7 @@ public class StopWatchPanel extends PluginPanel {
                 long totalMilliseconds = parseInputToMilliseconds(userInput);
                 updateCountdownDisplay(totalMilliseconds);
             } catch (NumberFormatException ex) {
-                System.err.println("Error updating countdown timer: " + ex.getMessage());
+                // System.err.println("Error updating countdown timer: " + ex.getMessage());
             }
         }
     }
@@ -347,7 +347,7 @@ public class StopWatchPanel extends PluginPanel {
         try {
             InputStream soundStream = getClass().getResourceAsStream("/sound/alert.wav");
             if (soundStream == null) {
-                System.err.println("Sound file not found!");
+                // System.err.println("Sound file not found!");
                 return;
             }
 
@@ -357,7 +357,7 @@ public class StopWatchPanel extends PluginPanel {
             clip.open(audioInputStream);
             clip.start();
         } catch (Exception e) {
-            System.err.println("Error playing sound: " + e.getMessage());
+            // System.err.println("Error playing sound: " + e.getMessage());
         }
     }
 
