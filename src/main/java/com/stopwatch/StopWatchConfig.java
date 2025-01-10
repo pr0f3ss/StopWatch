@@ -8,12 +8,13 @@ import net.runelite.client.config.ConfigItem;
 public interface StopWatchConfig extends Config
 {
 	@ConfigItem(
-		keyName = "greeting",
-		name = "Welcome Greeting",
-		description = "The message to show to the user when they login"
+		keyName = "useSound",
+		name = "Enable Sound Notifications",
+		description = "Toggles sound notification when the countdown reaches 0.",
+		position = 1
 	)
-	default String greeting()
+	default boolean useSound()
 	{
-		return "Hello";
+		return true;
 	}
 }

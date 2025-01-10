@@ -45,7 +45,7 @@ public class StopWatchPlugin extends Plugin
 		// Schedule the initialization on the client thread
 		clientThread.invokeLater(() ->
 		{
-			panel = new StopWatchPanel();
+			panel = new StopWatchPanel(config);
 
 			navButton = NavigationButton.builder()
 					.tooltip("Stopwatch")

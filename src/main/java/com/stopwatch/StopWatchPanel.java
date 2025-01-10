@@ -24,6 +24,7 @@ public class StopWatchPanel extends PluginPanel
     // Stopwatch variables
     private JLabel timeLabel;
     private long startTime = 0;
+    private long elapsedTime = 0;
     private boolean stopwatchRunning = false;
     private Timer stopwatchTimer;
 
@@ -34,7 +35,7 @@ public class StopWatchPanel extends PluginPanel
     private JTextField countdownInputField;
     private JLabel countdownLabel;
 
-    public StopWatchPanel()
+    public StopWatchPanel(StopWatchConfig config)
     {
         JTabbedPane tabbedPane = new JTabbedPane();
 
@@ -43,7 +44,7 @@ public class StopWatchPanel extends PluginPanel
         tabbedPane.addTab("Stopwatch", stopWatchPanel);
 
         // Countdown Timer Tab
-        JPanel countdownPanel = createCountdownPanel();
+        JPanel countdownPanel = createCountdownPanel(config);
         tabbedPane.addTab("Countdown Timer", countdownPanel);
 
         // Add the tabbed pane to the main panel
@@ -111,37 +112,38 @@ public class StopWatchPanel extends PluginPanel
     {
         if (!stopwatchRunning) {
             stopwatchRunning = true;
-            startTime = System.currentTimeMillis() - getElapsedStopwatchTime();
+            startTime = System.currentTimeMillis() - elapsedTime;
             stopwatchTimer.start();
         }
     }
 
     private void stopStopwatch()
     {
-        stopwatchRunning = false;
-        stopwatchTimer.stop();
+        if (stopwatchRunning) {
+            elapsedTime = System.currentTimeMillis() - startTime; // Save the current elapsed time
+            stopwatchRunning = false;
+            stopwatchTimer.stop();
+        }
     }
 
     private void resetStopwatch()
     {
         stopStopwatch();
-        startTime = 0;
+        elapsedTime = 0;
         updateStopwatchLabel(0);
     }
 
     private void updateStopwatch()
     {
-        long elapsedTime = getElapsedStopwatchTime();
-        updateStopwatchLabel(elapsedTime);
+        updateStopwatchLabel(getElapsedStopwatchTime());
     }
 
     private long getElapsedStopwatchTime()
     {
-        if (startTime == 0)
-        {
-            return 0;
+        if (!stopwatchRunning) {
+            return elapsedTime; // Return stored elapsed time when not running
         }
-        return System.currentTimeMillis() - startTime;
+        return System.currentTimeMillis() - startTime; // Calculate elapsed time when running
     }
 
     private void updateStopwatchLabel(long elapsedTime)
@@ -155,8 +157,7 @@ public class StopWatchPanel extends PluginPanel
         timeLabel.setText(timeString);
     }
 
-    // Inside createCountdownPanel()
-    private JPanel createCountdownPanel()
+    private JPanel createCountdownPanel(StopWatchConfig config)
     {
         JPanel countdownPanel = new JPanel(new BorderLayout());
 
@@ -214,7 +215,6 @@ public class StopWatchPanel extends PluginPanel
         JButton inferno1PresetButton = new JButton("Inferno 1st Set");
         JButton inferno2PresetButton = new JButton("Inferno 2nd Set");
 
-        //
         JPanel presetButtonPanel = new JPanel(new GridLayout(3,1));
         presetButtonPanel.add(cerberusPresetButton);
         presetButtonPanel.add(inferno1PresetButton);
@@ -233,7 +233,7 @@ public class StopWatchPanel extends PluginPanel
         long[] selectedCountdownTime = {0}; // Store original countdown time
 
         // Define the countdown action listener
-        ActionListener countdownAction = new ActionListener() {
+        final ActionListener countdownAction = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (countdownTime > 0) {
@@ -244,7 +244,9 @@ public class StopWatchPanel extends PluginPanel
                     countdownSwingTimer.stop();
                     countdownRunning = false;
 
-                    playSound(); // Play sound on completion
+                    if (config.useSound()) {
+                        playSound(); // Play sound on completion
+                    }
 
                     // Reset the button to its initial state
                     startCancelButton.setText("Start Countdown");
@@ -263,6 +265,9 @@ public class StopWatchPanel extends PluginPanel
                     selectedCountdownTime[0] = totalMilliseconds; // Store original
                     startCountdown(totalMilliseconds);
                     countdownSwingTimer.stop(); // Clear previous runs
+                    for (ActionListener listener : countdownSwingTimer.getActionListeners()) {
+                        countdownSwingTimer.removeActionListener(listener);
+                    }
                     countdownSwingTimer.addActionListener(countdownAction); // Add listener once
                     countdownSwingTimer.start();
 
