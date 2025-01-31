@@ -2,17 +2,17 @@ package com.stopwatch;
 
 import net.runelite.client.ui.PluginPanel;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.io.InputStream;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import com.stopwatch.sound.SoundPlayer;
 
 public class StopWatchPanel extends PluginPanel {
+    private SoundPlayer soundPlayer;
+
     // Stopwatch variables
     private JLabel timeLabel;
     private long startTime = 0;
@@ -26,7 +26,8 @@ public class StopWatchPanel extends PluginPanel {
     private Timer countdownSwingTimer;
     private JLabel countdownLabel;
 
-    public StopWatchPanel(StopWatchConfig config) {
+    public StopWatchPanel(StopWatchConfig config, SoundPlayer soundPlayer) {
+        this.soundPlayer = soundPlayer;
         JTabbedPane tabbedPane = new JTabbedPane();
 
         // Stopwatch Tab
@@ -221,7 +222,7 @@ public class StopWatchPanel extends PluginPanel {
                 countdownRunning = false;
 
                 if (config.useSound()) {
-                    playSound(); // Play sound on completion
+                    this.soundPlayer.playSound(); // Play sound on completion
                 }
 
                 // Reset the button to its initial state
@@ -341,24 +342,4 @@ public class StopWatchPanel extends PluginPanel {
         int centiseconds = (int) ((timeInMilliseconds % 1000) / 10);
         countdownLabel.setText(String.format("%02d:%02d.%02d", minutes, seconds, centiseconds));
     }
-
-    // Plays sound notification
-    private void playSound() {
-        try {
-            InputStream soundStream = getClass().getResourceAsStream("/sound/alert.wav");
-            if (soundStream == null) {
-                // System.err.println("Sound file not found!");
-                return;
-            }
-
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(soundStream);
-
-            Clip clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-            clip.start();
-        } catch (Exception e) {
-            // System.err.println("Error playing sound: " + e.getMessage());
-        }
-    }
-
 }
