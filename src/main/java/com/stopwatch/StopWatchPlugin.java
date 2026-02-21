@@ -29,12 +29,15 @@ public class StopWatchPlugin extends Plugin {
     @Inject
     private SoundPlayer soundPlayer;
 
+    @Inject
+    private ConfigManager configManager;
+
     private NavigationButton navButton;
 
     @Override
     protected void startUp() {
         log.info("StopWatch Plugin started!");
-        StopWatchPanel panel = new StopWatchPanel(config, soundPlayer);
+        StopWatchPanel panel = new StopWatchPanel(config, soundPlayer, configManager);
 
         navButton = NavigationButton.builder()
                 .tooltip("Stopwatch and Timer")

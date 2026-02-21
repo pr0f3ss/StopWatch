@@ -30,4 +30,28 @@ public interface StopWatchConfig extends Config {
     default int alertVolume() {
         return 100;
     }
+
+    @ConfigItem(
+            keyName = "lastTimerMin",
+            name = "Last timer minutes",
+            description = "Persisted automatically",
+            hidden = true
+    )
+    default int lastTimerMin() { return 0; }
+
+    @ConfigItem(
+            keyName = "lastTimerSec",
+            name = "Last timer seconds",
+            description = "Persisted automatically",
+            hidden = true
+    )
+    default int lastTimerSec() { return 30; }
+
+    @ConfigItem(
+            keyName = "customPresets",
+            name = "Custom presets",
+            description = "Persisted automatically",
+            hidden = true
+    )
+    default String customPresets() { return ""; }
 }
