@@ -52,7 +52,6 @@ public class StopWatchPlugin extends Plugin {
     @Override
     protected void shutDown() {
         clientToolbar.removeNavigation(navButton);
-        soundPlayer.close();
         log.info("StopWatch Plugin stopped!");
     }
 
