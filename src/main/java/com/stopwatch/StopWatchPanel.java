@@ -4,7 +4,6 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.Notifier;
-import com.stopwatch.sound.SoundPlayer;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -38,7 +37,6 @@ public class StopWatchPanel extends PluginPanel {
     private static final Color SEPARATOR_COLOR   = new Color(55, 53, 50);
 
     // ── Dependencies ──────────────────────────────────────────────────────────
-    private final SoundPlayer soundPlayer;
     private final StopWatchConfig config;
     private final ConfigManager configManager;
     private final Notifier notifier;
@@ -73,9 +71,8 @@ public class StopWatchPanel extends PluginPanel {
 
     // ─────────────────────────────────────────────────────────────────────────
 
-    public StopWatchPanel(StopWatchConfig config, SoundPlayer soundPlayer, ConfigManager configManager, Notifier notifier) {
+    public StopWatchPanel(StopWatchConfig config, ConfigManager configManager, Notifier notifier) {
         this.config = config;
-        this.soundPlayer = soundPlayer;
         this.configManager = configManager;
         this.notifier = notifier;
 
@@ -253,7 +250,6 @@ public class StopWatchPanel extends PluginPanel {
             } else {
                 countdownSwingTimer.stop();
                 countdownRunning = false;
-                if (config.useSound()) soundPlayer.playSound();
                 net.runelite.client.config.Notification notification = config.enableNotification();
                 if (notification.isEnabled()) notifier.notify(notification, "Timer finished!");
                 startCancelBtn.setText("Start Countdown");
