@@ -51,6 +51,7 @@ public class StopWatchPanel extends PluginPanel {
     // ── Countdown state ───────────────────────────────────────────────────────
     private long countdownTime = 0;
     private boolean countdownRunning = false;
+    private boolean countdownHidden = false;
     private Timer countdownSwingTimer;
     private JLabel countdownLabel;
 
@@ -171,10 +172,10 @@ public class StopWatchPanel extends PluginPanel {
     }
 
     private void updateStopwatchLabel(long ms) {
-        timeLabel.setText(String.format("%02d:%02d.%02d",
-                (int) ((ms % 3_600_000) / 60_000),
-                (int) ((ms % 60_000) / 1_000),
-                (int) ((ms % 1_000) / 10)));
+        int min = (int) ((ms % 3_600_000) / 60_000);
+        int sec = (int) ((ms % 60_000) / 1_000);
+        int cs  = (int) ((ms % 1_000) / 10);
+        timeLabel.setText(applyTimeMask(min, sec, cs));
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -191,10 +192,34 @@ public class StopWatchPanel extends PluginPanel {
         countdownLabel = new JLabel("00:00.00", SwingConstants.CENTER);
         countdownLabel.setFont(FontManager.getRunescapeFont().deriveFont(Font.BOLD, 40f));
         countdownLabel.setForeground(TEXT_PRIMARY);
-        countdownLabel.setAlignmentX(LEFT_ALIGNMENT);
-        countdownLabel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
         countdownLabel.setBorder(new EmptyBorder(4, 0, 8, 0));
-        root.add(countdownLabel);
+
+        JButton eyeBtn = new JButton("\uD83D\uDC41");
+        eyeBtn.setFont(new Font("Dialog", Font.PLAIN, 14));
+        eyeBtn.setForeground(TEXT_SECONDARY);
+        eyeBtn.setBackground(null);
+        eyeBtn.setBorderPainted(false);
+        eyeBtn.setContentAreaFilled(false);
+        eyeBtn.setFocusPainted(false);
+        eyeBtn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        eyeBtn.setToolTipText("Toggle timer visibility (timer will remain active when hidden)");
+        eyeBtn.addMouseListener(new MouseAdapter() {
+            @Override public void mouseEntered(MouseEvent e) { if (!countdownHidden) eyeBtn.setForeground(TEXT_PRIMARY); }
+            @Override public void mouseExited(MouseEvent e)  { eyeBtn.setForeground(countdownHidden ? TEXT_MUTED : TEXT_SECONDARY); }
+        });
+        eyeBtn.addActionListener(e -> {
+            countdownHidden = !countdownHidden;
+            eyeBtn.setForeground(countdownHidden ? TEXT_MUTED : TEXT_SECONDARY);
+            updateCountdownDisplay(countdownRunning ? countdownTime : spinnerToMs());
+        });
+
+        JPanel displayRow = new JPanel(new BorderLayout(0, 0));
+        displayRow.setOpaque(false);
+        displayRow.setAlignmentX(LEFT_ALIGNMENT);
+        displayRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+        displayRow.add(countdownLabel, BorderLayout.CENTER);
+        displayRow.add(eyeBtn, BorderLayout.EAST);
+        root.add(displayRow);
 
         // ── Min / Sec spinners ────────────────────────────────────────────────
         int savedMin = loadInt(KEY_LAST_MIN, 0);
@@ -250,6 +275,8 @@ public class StopWatchPanel extends PluginPanel {
             } else {
                 countdownSwingTimer.stop();
                 countdownRunning = false;
+                countdownHidden = false;
+                eyeBtn.setForeground(TEXT_SECONDARY);
                 net.runelite.client.config.Notification notification = config.enableNotification();
                 if (notification.isEnabled()) notifier.notify(notification, "Timer finished!");
                 startCancelBtn.setText("Start Countdown");
@@ -278,6 +305,8 @@ public class StopWatchPanel extends PluginPanel {
                 for (ActionListener l : countdownSwingTimer.getActionListeners())
                     countdownSwingTimer.removeActionListener(l);
                 countdownRunning = false;
+                countdownHidden = false;
+                eyeBtn.setForeground(TEXT_SECONDARY);
                 countdownTime = originalTime[0];
                 updateCountdownDisplay(countdownTime);
                 startCancelBtn.setText("Start Countdown");
@@ -348,6 +377,12 @@ public class StopWatchPanel extends PluginPanel {
     private void setSpinners(int minutes, int seconds) {
         minSpinner.setValue(minutes);
         secSpinner.setValue(seconds);
+        // Explicitly refresh — ChangeEvents only fire when a value actually changes,
+        // so if the preset matches the current spinner values the display would otherwise
+        // not be updated (e.g. clicking the same preset after a countdown ends).
+        if (!countdownRunning) {
+            updateCountdownDisplay(spinnerToMs());
+        }
     }
 
     /** Reads current spinner values and converts to milliseconds. */
@@ -695,10 +730,21 @@ public class StopWatchPanel extends PluginPanel {
     }
 
     private void updateCountdownDisplay(long ms) {
-        countdownLabel.setText(String.format("%02d:%02d.%02d",
-                (int) (ms / 60_000),
-                (int) ((ms % 60_000) / 1_000),
-                (int) ((ms % 1_000) / 10)));
+        if (countdownHidden) {
+            countdownLabel.setText("xx:xx.xx");
+            return;
+        }
+        int min = (int) (ms / 60_000);
+        int sec = (int) ((ms % 60_000) / 1_000);
+        int cs  = (int) ((ms % 1_000) / 10);
+        countdownLabel.setText(applyTimeMask(min, sec, cs));
+    }
+
+    private String applyTimeMask(int min, int sec, int cs) {
+        String tensStr  = config.showTensOfSeconds() ? String.valueOf(sec / 10)        : "x";
+        String unitsStr = config.showSeconds()        ? String.valueOf(sec % 10)        : "x";
+        String csStr    = config.showMilliseconds()   ? String.format("%02d", cs)       : "xx";
+        return String.format("%02d:%s%s.%s", min, tensStr, unitsStr, csStr);
     }
 
     private static Component rigidV(int height) {
