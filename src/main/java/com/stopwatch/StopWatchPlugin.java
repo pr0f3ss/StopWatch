@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import com.stopwatch.sound.SoundPlayer;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.Notifier;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.Plugin;
@@ -30,6 +31,9 @@ public class StopWatchPlugin extends Plugin {
     private SoundPlayer soundPlayer;
 
     @Inject
+    private Notifier notifier;
+
+    @Inject
     private ConfigManager configManager;
 
     private NavigationButton navButton;
@@ -37,7 +41,7 @@ public class StopWatchPlugin extends Plugin {
     @Override
     protected void startUp() {
         log.info("StopWatch Plugin started!");
-        StopWatchPanel panel = new StopWatchPanel(config, soundPlayer, configManager);
+        StopWatchPanel panel = new StopWatchPanel(config, soundPlayer, configManager, notifier);
 
         navButton = NavigationButton.builder()
                 .tooltip("Stopwatch and Timer")
