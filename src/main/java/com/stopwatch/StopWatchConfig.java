@@ -11,7 +11,7 @@ public interface StopWatchConfig extends Config {
     @ConfigItem(
             keyName = "enableNotification",
             name = "Enable Notifications",
-            description = "Send a RuneLite notification when the countdown finishes. Uses your global RuneLite notification settings by default (flash, sound, tray, etc.).",
+            description = "Toggle notification when the countdown reaches 0.",
             position = 1
     )
     default Notification enableNotification() {
@@ -35,7 +35,7 @@ public interface StopWatchConfig extends Config {
     @ConfigItem(
             keyName = "alertVolume",
             name = "Timer Alert Volume",
-            description = "Adjust the volume of the timer alert.",
+            description = "Adjust the volume of the timer alert when sound notifications are enabled.",
             position = 3
     )
     default int alertVolume() {
